@@ -4,6 +4,17 @@ SimpleRunningTracker is an open-source SwiftUI sample project designed as a **ha
 
 The intent is to provide a practical, maintainable baseline that demonstrates MVVM structure, scene-owned navigation, protocol-based dependencies, CoreLocation authorization handling, and actor-backed persistence.
 
+## Screenshots
+
+![Dashboard Initial](Screenshots/Dashboard-Initial_1.png)
+![Dashboard Data](Screenshots/Dashboard-Data_1.png)
+![Track Initial](Screenshots/Track-Initial_1.png)
+![Track Default](Screenshots/Track-Default_1.png)
+![Tracking Run](Screenshots/Tracking-Run_1.png)
+![Expanded Map Active Run](Screenshots/ExpandedMap-Active-Run_1.png)
+![History](Screenshots/History_1.png)
+![Run Detail](Screenshots/Run-Detail_1.png)
+
 ## Project Intent
 
 - Provide a clean SwiftUI architecture baseline for a running tracker app.
