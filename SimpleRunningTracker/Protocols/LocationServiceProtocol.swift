@@ -21,6 +21,9 @@ public protocol LocationServiceProtocol: AnyObject {
     /// Requests when-in-use location authorization from the system.
     func requestWhenInUseAuthorization()
 
+    /// Requests always authorization to support background tracking flows.
+    func requestAlwaysAuthorization()
+
     /// Starts delivering location updates.
     func startLocationUpdates()
 

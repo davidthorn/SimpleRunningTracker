@@ -13,18 +13,23 @@ public struct RouteMapView: View {
     public let points: [RunPoint]
     public let currentPoint: RunPoint?
     public let showsUserLocation: Bool
+    public let preservesUserCameraAfterInteraction: Bool
 
     @State private var cameraPosition: MapCameraPosition
+    @State private var hasUserAdjustedCamera: Bool
 
     public init(
         points: [RunPoint],
         currentPoint: RunPoint?,
-        showsUserLocation: Bool = true
+        showsUserLocation: Bool = true,
+        preservesUserCameraAfterInteraction: Bool = false
     ) {
         self.points = points
         self.currentPoint = currentPoint
         self.showsUserLocation = showsUserLocation
+        self.preservesUserCameraAfterInteraction = preservesUserCameraAfterInteraction
         self._cameraPosition = State(initialValue: .automatic)
+        self._hasUserAdjustedCamera = State(initialValue: false)
     }
 
     public var body: some View {
@@ -85,17 +90,45 @@ public struct RouteMapView: View {
                     }
                 }
                 .mapStyle(.standard)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 1)
+                        .onChanged { _ in
+                            if preservesUserCameraAfterInteraction {
+                                hasUserAdjustedCamera = true
+                            }
+                        }
+                )
+                .simultaneousGesture(
+                    MagnificationGesture()
+                        .onChanged { _ in
+                            if preservesUserCameraAfterInteraction {
+                                hasUserAdjustedCamera = true
+                            }
+                        }
+                )
                 .onAppear {
-                    fitCameraIfNeeded()
+                    fitCameraIfNeeded(animated: false)
                 }
                 .onChange(of: points.count) { _, _ in
-                    fitCameraIfNeeded()
+                    if shouldAutoFitCamera {
+                        fitCameraIfNeeded(animated: true)
+                    }
                 }
                 .onChange(of: currentPoint?.timestamp) { _, _ in
-                    fitCameraIfNeeded()
+                    if shouldAutoFitCamera {
+                        fitCameraIfNeeded(animated: true)
+                    }
                 }
             }
         }
+    }
+
+    private var shouldAutoFitCamera: Bool {
+        if !preservesUserCameraAfterInteraction {
+            return true
+        }
+
+        return !hasUserAdjustedCamera
     }
 
     private var shouldShowLocationPlaceholder: Bool {
@@ -108,30 +141,36 @@ public struct RouteMapView: View {
         }
     }
 
-    private func fitCameraIfNeeded() {
+    private func fitCameraIfNeeded(animated: Bool) {
         if points.isEmpty {
             guard let currentPoint else {
-                cameraPosition = .automatic
+                setCameraPosition(.automatic, animated: animated)
                 return
             }
 
             let center = CLLocationCoordinate2D(latitude: currentPoint.latitude, longitude: currentPoint.longitude)
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: center,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                )
+            setCameraPosition(
+                .region(
+                    MKCoordinateRegion(
+                        center: center,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    )
+                ),
+                animated: animated
             )
             return
         }
 
         if points.count == 1, let point = points.first {
             let center = CLLocationCoordinate2D(latitude: point.latitude, longitude: point.longitude)
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: center,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                )
+            setCameraPosition(
+                .region(
+                    MKCoordinateRegion(
+                        center: center,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    )
+                ),
+                animated: animated
             )
             return
         }
@@ -159,7 +198,17 @@ public struct RouteMapView: View {
             longitudeDelta: max((maxLongitude - minLongitude) * 1.4, 0.005)
         )
 
-        cameraPosition = .region(MKCoordinateRegion(center: center, span: span))
+        setCameraPosition(.region(MKCoordinateRegion(center: center, span: span)), animated: animated)
+    }
+
+    private func setCameraPosition(_ position: MapCameraPosition, animated: Bool) {
+        if animated {
+            withAnimation(.easeInOut(duration: 0.45)) {
+                cameraPosition = position
+            }
+        } else {
+            cameraPosition = position
+        }
     }
 }
 

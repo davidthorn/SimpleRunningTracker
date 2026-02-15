@@ -61,7 +61,8 @@ public struct ExpandableRouteMapView: View {
                 RouteMapView(
                     points: points,
                     currentPoint: currentPoint,
-                    showsUserLocation: showsUserLocation
+                    showsUserLocation: showsUserLocation,
+                    preservesUserCameraAfterInteraction: true
                 )
                     .ignoresSafeArea()
 

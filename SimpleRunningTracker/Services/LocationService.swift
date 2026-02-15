@@ -24,6 +24,8 @@ public final class LocationService: NSObject, CLLocationManagerDelegate, Locatio
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.activityType = .fitness
         manager.pausesLocationUpdatesAutomatically = false
+        manager.allowsBackgroundLocationUpdates = true
+        manager.showsBackgroundLocationIndicator = true
     }
 
     public func currentAuthorizationState() -> LocationAuthorizationState {
@@ -58,6 +60,10 @@ public final class LocationService: NSObject, CLLocationManagerDelegate, Locatio
 
     public func requestWhenInUseAuthorization() {
         manager.requestWhenInUseAuthorization()
+    }
+
+    public func requestAlwaysAuthorization() {
+        manager.requestAlwaysAuthorization()
     }
 
     public func startLocationUpdates() {

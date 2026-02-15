@@ -98,7 +98,14 @@ public final class RunTrackingViewModel: ObservableObject {
     }
 
     public func requestAuthorization() async {
-        locationService.requestWhenInUseAuthorization()
+        switch authorizationState {
+        case .notDetermined:
+            locationService.requestWhenInUseAuthorization()
+        case .authorizedWhenInUse:
+            locationService.requestAlwaysAuthorization()
+        case .authorizedAlways, .denied, .restricted:
+            break
+        }
         authorizationState = locationService.currentAuthorizationState()
     }
 
